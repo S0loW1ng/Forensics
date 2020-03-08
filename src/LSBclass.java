@@ -29,61 +29,111 @@ public class LSBclass {
         BufferedImage BIm = ImageIO.read(new File(args[0]));// input image
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        ImageIO.write(BIm,"bmp", bos);
-        pic = bos.toByteArray(); // convert image to byte array.
+
+
+        //pic = bos.toByteArray(); // convert image to byte array.
         String binafied = textToBin(args[1]); //input text
-        System.out.println("To Bin " + binafied);
-        if(pic.length-100>= binafied.length()){ // 100 is pading to avoid errors in the heading of the image.
-
-
-            for(int i = 0;i < binafied.length(); i ++){
-              int l =  Integer.parseInt(Character.toString(binafied.charAt(i)));
-              byte by = pic[i+100];
-
-              byte res = (byte) (by ^ (byte) l);
-              if(((by & 0x1) == 0 && (l==1)) ){
-                  pic[i+100] = (byte) (by | (byte) l);
-              }else if(((by & 0x1) == 1 && (l==1)) ){
-                  pic[i+100] = (byte) (by | (byte) l);
-              }else if (((by & 0x1) == 0 && (l==0)) ){
-                  pic[i+100] = (byte) (by & (byte) l);
-              }else if(((by & 0x1) == 1 && (l==0)) ){
-                  pic[i+100] = (byte) (by & (byte) l);
-              }
+      //  System.out.println("To Bin " + binafied);
+        // AAAAAAAA|RRRRRRRR|GGGGGGGG|BBBBBBBBB
+        int maxW = BIm.getWidth();
+        int maxH = BIm.getHeight();
+        int w = 0;
+        int h = 2;
+        for (int i = 0; i<binafied.length(); i++){
+            int pixelCol = BIm.getRGB(w,h);
+            int l =  Integer.parseInt(Character.toString(binafied.charAt(i)));
+            // get the first byte propely and set it
+            System.out.print(BIm.getRGB(w,h)+ " ");
+            if(((pixelCol & 0x1) == 0 && (l==1)) ){
+               // pic[i+100] = (byte) (pixelCol | (byte) l);
+                System.out.print(BIm.getRGB(w,h)+ " ");
+                BIm.setRGB(w,h,(pixelCol | l));
+            }else if(((pixelCol & 0x1) == 1 && (l==1)) ){
+              ////  pic[i+100] = (byte) (pixelCol | (byte) l);
+                System.out.print(BIm.getRGB(w,h) + " ");
+                BIm.setRGB(w,h,(pixelCol | l));
+            }else if (((pixelCol & 0x1) == 0 && (l==0)) ){
+              //  pic[i+100] = (byte) (pixelCol & (byte) l);
+               System.out.print(BIm.getRGB(w,h)+ " ");
+                BIm.setRGB(w,h,(pixelCol & 0xFFFFFFFE));
+            }else if(((pixelCol & 0x1) == 1 && (l==0)) ){
+             //   pic[i+100] = (byte) (pixelCol & (byte) l);
+                System.out.print(BIm.getRGB(w,h)+ " ");
+                BIm.setRGB(w,h,(pixelCol & 0xFFFFFFFE));
 
             }
-            BufferedImage out = ImageIO.read(new ByteArrayInputStream(pic));
-            ImageIO.write(out,"bmp",new File("out.bmp"));
 
-        }else{
-            System.err.println("ERROR");
+            if(w< maxW){
+                w++;
+            }else{
+                w=0;
+                if(h< maxH){
+                    h++;
+                }else {
+                    System.out.println("REACHED LIMIT BREAKING");
+                    break;
+                }
+            }
+
         }
-
-        decrypt();
-
+        ImageIO.write(BIm,"bmp", new File("Lima.bmp"));
+        System.out.println();
+        System.out.println("To Bin " + binafied);
+        decrypt(binafied, "Lima.bmp");
 
     }
 
-    private static void decrypt() throws IOException {
-        BufferedImage BIm = ImageIO.read(new File("out.bmp"));// input image
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    private static void decrypt(String binafied, String args) throws IOException {
+        BufferedImage BIm = ImageIO.read(new File(args));// input image
 
-        ImageIO.write(BIm,"bmp", bos);
-        byte[] in = bos.toByteArray();
 
         String bitefied = "";
+        int maxW = BIm.getWidth();
+        int maxH = BIm.getHeight();
+        int w = 0;
+        int h = 2;
 
-        for(int i = 100; i<187; i++){ // grabs the lsb
-            if((in[i]&0x1) == 1){
+        for (int i = 0; i<binafied.length(); i++){
+            if(w< maxW){
+                w++;
+            }else{
+                w=0;
+                if(h< maxH){
+                    h++;
+                }else {
+                    System.out.println("REACHED LIMIT BREAKING");
+                    break;
+                }
+            }
+
+            int pixel = BIm.getRGB(w,h);
+           // System.out.print(pixel + " ");
+            if((pixel&0x1) == 1){
                 bitefied = bitefied + "1";
             }else
                 bitefied = bitefied + "0";
+
+
+
         }
+        //rotatethe btes for NO REASON CUZ JAVA IS SOOOOO STUPID OMG CAN YOU LIKE NOT?????
+         char first =   bitefied.charAt(0);
+        char last = bitefied.charAt(bitefied.length()-1);
 
 
-        String decode = new String(new BigInteger(bitefied, 2).toByteArray());
-        System.out.println("As decriptedtxt:"+ decode);
+        StringBuilder stb = new StringBuilder(bitefied);
+        stb.insert(0,last);
+        stb.deleteCharAt(stb.length()-1);
+
+        String decode = new String(new BigInteger(stb.toString(), 2).toByteArray());
+
+        System.out.println("As decrypted txt:"+ decode);
+
+
     }
+
+
+
 
     public static byte[] toByteArray(String in) { // file to byte array
         FileInputStream fis = null;
