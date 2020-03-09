@@ -33,7 +33,7 @@ public class LSBclass {
 
         //pic = bos.toByteArray(); // convert image to byte array.
         String binafied = textToBin(args[1]); //input text
-      //  System.out.println("To Bin " + binafied);
+        System.out.println("To Bin " + binafied);
         // AAAAAAAA|RRRRRRRR|GGGGGGGG|BBBBBBBBB
         int maxW = BIm.getWidth();
         int maxH = BIm.getHeight();
@@ -76,10 +76,10 @@ public class LSBclass {
             }
 
         }
-        ImageIO.write(BIm,"bmp", new File("Lima.bmp"));
+        ImageIO.write(BIm,"bmp", new File("Out.bmp"));
         System.out.println();
         System.out.println("To Bin " + binafied);
-        decrypt(binafied, "Lima.bmp");
+        decrypt(binafied, "Out.bmp");
 
     }
 
@@ -122,12 +122,13 @@ public class LSBclass {
 
 
         StringBuilder stb = new StringBuilder(bitefied);
-        stb.insert(0,last);
+         stb.insert(0,'1');
         stb.deleteCharAt(stb.length()-1);
 
         String decode = new String(new BigInteger(stb.toString(), 2).toByteArray());
 
-        System.out.println("As decrypted txt:"+ decode);
+        System.out.println("As Dbi:"+ stb.toString());
+        System.out.println(decode);
 
 
     }
