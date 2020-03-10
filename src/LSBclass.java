@@ -34,16 +34,20 @@ public class LSBclass {
         //pic = bos.toByteArray(); // convert image to byte array.
         String binafied = textToBin(args[1]); //input text
         System.out.println("To Bin " + binafied);
+	//how bits are set in 24 bit color  BMP
         // AAAAAAAA|RRRRRRRR|GGGGGGGG|BBBBBBBBB
         int maxW = BIm.getWidth();
         int maxH = BIm.getHeight();
         int w = 0;
         int h = 2;
+	// To make sure we only vhange the needed 
+	// we check all the posibilities of bits
+	// do not change this please
+
         for (int i = 0; i<binafied.length(); i++){
             int pixelCol = BIm.getRGB(w,h);
-            int l =  Integer.parseInt(Character.toString(binafied.charAt(i)));
+            int l =  Integer.parseInt(Character.toString(binafied.charAt(i)));	
             // get the first byte propely and set it
-            System.out.print(BIm.getRGB(w,h)+ " ");
             if(((pixelCol & 0x1) == 0 && (l==1)) ){
                // pic[i+100] = (byte) (pixelCol | (byte) l);
                 System.out.print(BIm.getRGB(w,h)+ " ");
@@ -62,6 +66,7 @@ public class LSBclass {
                 BIm.setRGB(w,h,(pixelCol & 0xFFFFFFFE));
 
             }
+	// We chexk size and see of the  binary format is within limits
 
             if(w< maxW){
                 w++;
@@ -75,7 +80,9 @@ public class LSBclass {
                 }
             }
 
+
         }
+	//  we  write out  vesel with payload
         ImageIO.write(BIm,"bmp", new File("Out.bmp"));
         System.out.println();
         System.out.println("To Bin " + binafied);
@@ -115,18 +122,17 @@ public class LSBclass {
 
 
 
-        }
-        //rotatethe btes for NO REASON CUZ JAVA IS SOOOOO STUPID OMG CAN YOU LIKE NOT?????
+ }
          char first =   bitefied.charAt(0);
         char last = bitefied.charAt(bitefied.length()-1);
-
+//due to some weird error we insrt a bit and delete the last ine
 
         StringBuilder stb = new StringBuilder(bitefied);
          stb.insert(0,'1');
         stb.deleteCharAt(stb.length()-1);
 
         String decode = new String(new BigInteger(stb.toString(), 2).toByteArray());
-
+//      We double check the values  to see if it works 
         System.out.println("As Dbi:"+ stb.toString());
         System.out.println(decode);
 
